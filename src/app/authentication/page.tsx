@@ -1,12 +1,19 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import  SignUpForm  from "./_components/sign-up-form";
 import  LoginForm  from "./_components/login-form";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
-const AuthenticationPage = () => {
-    
+const AuthenticationPage = async () => {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    })
+
+    if(session?.user) {
+        redirect("/dashboard")
+    }
 
     
 
