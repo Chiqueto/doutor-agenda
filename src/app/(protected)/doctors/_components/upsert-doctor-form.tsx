@@ -32,7 +32,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { medicalSpecialties } from "../_constants";
 import { NumericFormat } from "react-number-format";
-
+import { useAction } from "next-safe-action/hooks";
+import { upsertDoctor } from "@/actions/upsert-doctor";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 const formSchema = z
   .object({
     name: z.string().min(1, { message: "Nome é obrigatório" }),
@@ -59,7 +62,11 @@ const formSchema = z
     },
   );
 
-const UpsertDoctorForm = () => {
+interface UpsertDoctorFormProps {
+  onSuccess?: () => void;
+}
+
+const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,14 +74,29 @@ const UpsertDoctorForm = () => {
       speciality: "",
       appointmentPrice: 0,
       availableFromWeekDay: "0",
-      availableToWeekDay: "0",
+      availableToWeekDay: "5",
       availableFromTime: "",
       availableToTime: "",
     },
   });
 
+  const upsertDoctorAction = useAction(upsertDoctor, {
+    onSuccess: () => {
+      toast.success("Médico adicionado com sucesso");
+      onSuccess?.();
+    },
+    onError: () => {
+      toast.error("Erro ao adicionar médico");
+    },
+  });
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    upsertDoctorAction.execute({
+      ...values,
+      appointmentPriceInCents: values.appointmentPrice * 100,
+      availableFromWeekDay: parseInt(values.availableFromWeekDay),
+      availableToWeekDay: parseInt(values.availableToWeekDay),
+    });
   };
 
   return (
@@ -342,7 +364,12 @@ const UpsertDoctorForm = () => {
             )}
           />
           <DialogFooter>
-            <Button type="submit">Adicionar</Button>
+            <Button type="submit" disabled={upsertDoctorAction.isPending}>
+              {upsertDoctorAction.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Adicionar
+            </Button>
           </DialogFooter>
         </form>
       </Form>
