@@ -36,6 +36,7 @@ import { useAction } from "next-safe-action/hooks";
 import { upsertDoctor } from "@/actions/upsert-doctor";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { doctorsTable } from "@/db/schema";
 const formSchema = z
   .object({
     name: z.string().min(1, { message: "Nome é obrigatório" }),
@@ -64,19 +65,22 @@ const formSchema = z
 
 interface UpsertDoctorFormProps {
   onSuccess?: () => void;
+  doctor?: typeof doctorsTable.$inferSelect;
 }
 
-const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
+const UpsertDoctorForm = ({ onSuccess, doctor }: UpsertDoctorFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      speciality: "",
-      appointmentPrice: 0,
-      availableFromWeekDay: "0",
-      availableToWeekDay: "5",
-      availableFromTime: "",
-      availableToTime: "",
+      name: doctor?.name ?? "",
+      speciality: doctor?.speciality ?? "",
+      appointmentPrice: doctor?.appointmentPriceInCents
+        ? doctor.appointmentPriceInCents / 100
+        : 0,
+      availableFromWeekDay: doctor?.availableFromWeekDay.toString() ?? "1",
+      availableToWeekDay: doctor?.availableToWeekDay.toString() ?? "5",
+      availableFromTime: doctor?.availableFromTime ?? "",
+      availableToTime: doctor?.availableToTime ?? "",
     },
   });
 
@@ -93,6 +97,7 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     upsertDoctorAction.execute({
       ...values,
+      id: doctor?.id,
       appointmentPriceInCents: values.appointmentPrice * 100,
       availableFromWeekDay: parseInt(values.availableFromWeekDay),
       availableToWeekDay: parseInt(values.availableToWeekDay),
@@ -102,9 +107,11 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Adicionar Médico</DialogTitle>
+        <DialogTitle>{doctor ? doctor.name : "Adicionar Médico"}</DialogTitle>
         <DialogDescription>
-          Adicione um novo médico à sua clínica
+          {doctor
+            ? `Edite as informações desse médico`
+            : "Adicione um novo médico à sua clínica"}
         </DialogDescription>
       </DialogHeader>
       <Form {...form}>
@@ -179,7 +186,10 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Dia inicial de disponibilidade</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={"1"}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={doctor?.availableFromWeekDay.toString() ?? "1"}
+                >
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione um dia" />
@@ -205,7 +215,10 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Dia final de disponibilidade</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={"5"}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={doctor?.availableToWeekDay.toString() ?? "5"}
+                >
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione um dia" />
@@ -368,7 +381,7 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
               {upsertDoctorAction.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Adicionar
+              {doctor ? "Editar" : "Adicionar"}
             </Button>
           </DialogFooter>
         </form>
