@@ -19,6 +19,7 @@ interface DatePickerProps {
   onSelect?: (date: Date | undefined) => void;
   disabled?: boolean;
   placeholder?: string;
+  isDateAvailable?: (date: Date) => boolean;
 }
 
 export function DatePicker({
@@ -26,6 +27,7 @@ export function DatePicker({
   onSelect,
   disabled = false,
   placeholder = "Selecione uma data",
+  isDateAvailable,
 }: DatePickerProps) {
   return (
     <Popover>
@@ -48,7 +50,11 @@ export function DatePicker({
           selected={date}
           onSelect={onSelect}
           initialFocus
-          disabled={(date) => date < new Date()}
+          disabled={(date) => {
+            const isPastDate = date < new Date();
+            const isAvailable = isDateAvailable?.(date) ?? false;
+            return isPastDate || !isAvailable;
+          }}
           locale={ptBR}
         />
       </PopoverContent>

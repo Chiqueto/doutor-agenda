@@ -130,6 +130,19 @@ const AddAppointmentForm = ({
     createAppointmentAction.execute(values);
   };
 
+  const isDateAvailable = (date: Date) => {
+    if (!selectedDoctorId) return false;
+    const selectedDoctor = doctors.find(
+      (doctor) => doctor.id === selectedDoctorId,
+    );
+    if (!selectedDoctor) return false;
+    const dayOfWeek = date.getDay();
+    return (
+      dayOfWeek >= selectedDoctor?.availableFromWeekDay &&
+      dayOfWeek <= selectedDoctor?.availableToWeekDay
+    );
+  };
+
   const isDateTimeEnabled = selectedPatientId && selectedDoctorId;
 
   return (
@@ -229,6 +242,7 @@ const AddAppointmentForm = ({
                   onSelect={field.onChange}
                   disabled={!isDateTimeEnabled}
                   placeholder="Selecione uma data"
+                  isDateAvailable={isDateAvailable}
                 />
                 <FormMessage />
               </FormItem>
