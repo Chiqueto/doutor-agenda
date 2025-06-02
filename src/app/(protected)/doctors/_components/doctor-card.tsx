@@ -1,5 +1,9 @@
 "use client";
 
+import { Calendar1Icon, ClockIcon, DollarSignIcon } from "lucide-react";
+import { useState } from "react";
+
+import { formatCurrencyInCents } from "@/_helpers/currency";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,11 +16,9 @@ import {
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { doctorsTable } from "@/db/schema";
-import { Calendar1Icon, ClockIcon, DollarSignIcon } from "lucide-react";
-import UpsertDoctorForm from "./upsert-doctor-form";
+
 import { getAvaiability } from "../_helpers/avaiability";
-import { formatCurrencyInCents } from "@/_helpers/currency";
-import { useState } from "react";
+import UpsertDoctorForm from "./upsert-doctor-form";
 
 interface DoctorCardProps {
   doctor: typeof doctorsTable.$inferSelect;
@@ -71,7 +73,7 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
               availableFromTime: avaiability.from.format("HH:mm:ss"),
               availableToTime: avaiability.to.format("HH:mm:ss"),
             }}
-            onSuccess={() => setIsOpen(false)}
+            onSuccess={() => setIsOpen(false)} isOpen
           />
         </Dialog>
       </CardFooter>

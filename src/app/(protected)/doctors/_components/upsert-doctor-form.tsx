@@ -1,5 +1,27 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Trash2Icon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { NumericFormat } from "react-number-format";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import { deleteDoctor } from "@/actions/delete-doctor";
+import { upsertDoctor } from "@/actions/upsert-doctor";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   DialogContent,
@@ -11,7 +33,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -27,28 +48,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { medicalSpecialties } from "../_constants";
-import { NumericFormat } from "react-number-format";
-import { useAction } from "next-safe-action/hooks";
-import { upsertDoctor } from "@/actions/upsert-doctor";
-import { toast } from "sonner";
-import { Loader2, Trash2Icon } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { doctorsTable } from "@/db/schema";
-import { deleteDoctor } from "@/actions/delete-doctor";
+
+import { medicalSpecialties } from "../_constants";
 const formSchema = z
   .object({
     name: z.string().min(1, { message: "Nome é obrigatório" }),
@@ -78,9 +80,10 @@ const formSchema = z
 interface UpsertDoctorFormProps {
   onSuccess?: () => void;
   doctor?: typeof doctorsTable.$inferSelect;
+  isOpen: boolean
 }
 
-const UpsertDoctorForm = ({ onSuccess, doctor }: UpsertDoctorFormProps) => {
+const UpsertDoctorForm = ({ onSuccess, doctor, isOpen }: UpsertDoctorFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     shouldUnregister: true,
     resolver: zodResolver(formSchema),
@@ -97,10 +100,12 @@ const UpsertDoctorForm = ({ onSuccess, doctor }: UpsertDoctorFormProps) => {
     },
   });
 
+
+
   const upsertDoctorAction = useAction(upsertDoctor, {
     onSuccess: () => {
-      toast.success("Médico adicionado com sucesso");
       onSuccess?.();
+      toast.success("Médico adicionado com sucesso");
     },
     onError: () => {
       toast.error("Erro ao adicionar médico");
@@ -135,6 +140,22 @@ const UpsertDoctorForm = ({ onSuccess, doctor }: UpsertDoctorFormProps) => {
       id: doctor?.id,
     });
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        name: doctor?.name ?? "",
+        speciality: doctor?.speciality ?? "",
+        appointmentPrice: doctor?.appointmentPriceInCents
+          ? doctor.appointmentPriceInCents / 100
+          : 0,
+        availableFromWeekDay: doctor?.availableFromWeekDay.toString() ?? "1",
+        availableToWeekDay: doctor?.availableToWeekDay.toString() ?? "5",
+        availableFromTime: doctor?.availableFromTime ?? "",
+        availableToTime: doctor?.availableToTime ?? "",
+      });
+    }
+  }, [isOpen, form, doctor]);
 
   return (
     <DialogContent>
