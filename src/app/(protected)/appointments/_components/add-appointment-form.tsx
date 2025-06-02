@@ -37,6 +37,9 @@ import {
 import { doctorsTable, patientsTable } from "@/db/schema";
 
 import { DatePicker } from "@/components/ui/date-picker";
+import { useQuery } from "@tanstack/react-query";
+import { getAvailableTimes } from "@/actions/get-available-times";
+import dayjs from "dayjs";
 
 const formSchema = z.object({
   patientId: z.string().min(1, { message: "Paciente é obrigatório" }),
@@ -77,8 +80,18 @@ const AddAppointmentForm = ({
     },
   });
 
-  const patientId = form.watch("patientId");
-  const doctorId = form.watch("doctorId");
+  const selectedPatientId = form.watch("patientId");
+  const selectedDoctorId = form.watch("doctorId");
+  const selectedDate = form.watch("date");
+
+  const { data: availableTimes } = useQuery({
+    queryKey: ["available-times", selectedDate, selectedDoctorId],
+    queryFn: () =>
+      getAvailableTimes({
+        date: dayjs(selectedDate).format("YYYY-MM-DD"),
+        doctorId: selectedDoctorId,
+      }),
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -88,8 +101,8 @@ const AddAppointmentForm = ({
   }, [isOpen, form]);
 
   useEffect(() => {
-    if (doctorId) {
-      const doctor = doctors.find((d) => d.id === doctorId);
+    if (selectedDoctorId) {
+      const doctor = doctors.find((d) => d.id === selectedDoctorId);
       setSelectedDoctor(doctor || null);
       if (doctor) {
         form.setValue(
@@ -101,7 +114,7 @@ const AddAppointmentForm = ({
       setSelectedDoctor(null);
       form.setValue("appointmentPriceInCents", 0);
     }
-  }, [doctorId, doctors, form]);
+  }, [selectedDoctorId, doctors, form]);
 
   const createAppointmentAction = useAction(createAppointment, {
     onSuccess: () => {
@@ -117,7 +130,7 @@ const AddAppointmentForm = ({
     createAppointmentAction.execute(values);
   };
 
-  const isDateTimeEnabled = patientId && doctorId;
+  const isDateTimeEnabled = selectedPatientId && selectedDoctorId;
 
   return (
     <DialogContent className="max-w-md">
@@ -231,7 +244,7 @@ const AddAppointmentForm = ({
                 <Select
                   onValueChange={field.onChange}
                   value={field.value}
-                  disabled={!isDateTimeEnabled}
+                  disabled={!isDateTimeEnabled || !selectedDate}
                 >
                   <FormControl className="w-full">
                     <SelectTrigger>
@@ -239,14 +252,11 @@ const AddAppointmentForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="08:00">08:00</SelectItem>
-                    <SelectItem value="09:00">09:00</SelectItem>
-                    <SelectItem value="10:00">10:00</SelectItem>
-                    <SelectItem value="11:00">11:00</SelectItem>
-                    <SelectItem value="14:00">14:00</SelectItem>
-                    <SelectItem value="15:00">15:00</SelectItem>
-                    <SelectItem value="16:00">16:00</SelectItem>
-                    <SelectItem value="17:00">17:00</SelectItem>
+                    {availableTimes?.data?.map((time) => (
+                      <SelectItem key={time.value} value={time.value}>
+                        {time.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
