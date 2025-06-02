@@ -91,7 +91,7 @@ export const getAvailableTimes = actionClient
     return doctorTimeSlots.map((time) => {
       return {
         value: time,
-        avaiable: appointmentsOnSelectedDate.includes(time),
+        available: !appointmentsOnSelectedDate.includes(time),
         label: time.substring(0, 5),
       };
     });
