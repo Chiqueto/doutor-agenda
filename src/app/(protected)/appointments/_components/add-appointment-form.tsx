@@ -9,7 +9,7 @@ import { NumericFormat } from "react-number-format";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { createAppointment } from "@/actions/create-appointment";
+import { createAppointment } from "@/actions/add-appointment";
 import { Button } from "@/components/ui/button";
 import {
   DialogContent,
@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/select";
 import { doctorsTable, patientsTable } from "@/db/schema";
 
-import { DatePicker } from "../../../../components/ui/date-picker";
+import { DatePicker } from "@/components/ui/date-picker";
 
 const formSchema = z.object({
   patientId: z.string().min(1, { message: "Paciente é obrigatório" }),
@@ -48,19 +48,19 @@ const formSchema = z.object({
     .min(1, { message: "Valor da consulta é obrigatório" }),
 });
 
-interface UpsertAppointmentFormProps {
+interface AddAppointmentFormProps {
   onSuccess?: () => void;
   isOpen: boolean;
   doctors: (typeof doctorsTable.$inferSelect)[];
   patients: (typeof patientsTable.$inferSelect)[];
 }
 
-const UpsertAppointmentForm = ({
+const AddAppointmentForm = ({
   onSuccess,
   isOpen,
   doctors,
   patients,
-}: UpsertAppointmentFormProps) => {
+}: AddAppointmentFormProps) => {
   const [selectedDoctor, setSelectedDoctor] = useState<
     typeof doctorsTable.$inferSelect | null
   >(null);
@@ -239,7 +239,6 @@ const UpsertAppointmentForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {/* TODO: Implementar lógica de horários disponíveis */}
                     <SelectItem value="08:00">08:00</SelectItem>
                     <SelectItem value="09:00">09:00</SelectItem>
                     <SelectItem value="10:00">10:00</SelectItem>
@@ -272,4 +271,4 @@ const UpsertAppointmentForm = ({
   );
 };
 
-export default UpsertAppointmentForm;
+export default AddAppointmentForm;

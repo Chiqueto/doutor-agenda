@@ -7,32 +7,35 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { doctorsTable, patientsTable } from "@/db/schema";
 
-import UpsertAppointmentForm from "./upsert-appointment-form";
+import AddAppointmentForm from "./add-appointment-form";
 
 interface AddAppointmentButtonProps {
-    doctors: (typeof doctorsTable.$inferSelect)[];
-    patients: (typeof patientsTable.$inferSelect)[];
+  doctors: (typeof doctorsTable.$inferSelect)[];
+  patients: (typeof patientsTable.$inferSelect)[];
 }
 
-const AddAppointmentButton = ({ doctors, patients }: AddAppointmentButtonProps) => {
-    const [isOpen, setIsOpen] = useState(false);
+const AddAppointmentButton = ({
+  doctors,
+  patients,
+}: AddAppointmentButtonProps) => {
+  const [isOpen, setIsOpen] = useState(false);
 
-    return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <Plus />
-                    Novo agendamento
-                </Button>
-            </DialogTrigger>
-            <UpsertAppointmentForm
-                onSuccess={() => setIsOpen(false)}
-                isOpen
-                doctors={doctors}
-                patients={patients}
-            />
-        </Dialog>
-    );
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button>
+          <Plus />
+          Novo agendamento
+        </Button>
+      </DialogTrigger>
+      <AddAppointmentForm
+        onSuccess={() => setIsOpen(false)}
+        isOpen={isOpen}
+        doctors={doctors}
+        patients={patients}
+      />
+    </Dialog>
+  );
 };
 
 export default AddAppointmentButton;

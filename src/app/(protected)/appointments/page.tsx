@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { DataTable } from "@/components/ui/data-table";
 import {
     PageActions,
     PageContainer,
@@ -12,10 +13,11 @@ import {
     PageTitle,
 } from "@/components/ui/page-container";
 import { db } from "@/db";
-import { doctorsTable, patientsTable } from "@/db/schema";
+import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 import AddAppointmentButton from "./_components/add-appointment-button";
+import { appointmentsTableColumns } from "./_components/table-columns";
 
 
 const AppointmentsPage = async () => {
@@ -29,11 +31,9 @@ const AppointmentsPage = async () => {
 
     if (!session.user.clinic) {
         redirect("/clinic-form");
-    }
+    } const clinicId = session.user.clinic.id;
 
-    const clinicId = session.user.clinic.id;
-
-    const [patients, doctors] = await Promise.all([
+    const [patients, doctors, appointments] = await Promise.all([
         db.query.patientsTable.findMany({
             where: eq(patientsTable.clinicId, clinicId),
             orderBy: (patientsTable, { asc }) => [asc(patientsTable.name)],
@@ -41,6 +41,25 @@ const AppointmentsPage = async () => {
         db.query.doctorsTable.findMany({
             where: eq(doctorsTable.clinicId, clinicId),
             orderBy: (doctorsTable, { asc }) => [asc(doctorsTable.name)],
+        }),
+        db.query.appointmentsTable.findMany({
+            where: eq(appointmentsTable.clinicId, clinicId),
+            orderBy: (appointmentsTable, { desc }) => [desc(appointmentsTable.date)],
+            with: {
+                patient: {
+                    columns: {
+                        id: true,
+                        name: true,
+                    },
+                },
+                doctor: {
+                    columns: {
+                        id: true,
+                        name: true,
+                        speciality: true,
+                    },
+                },
+            },
         }),
     ]);
 
@@ -55,14 +74,9 @@ const AppointmentsPage = async () => {
                 </PageHeaderContent>
                 <PageActions>
                     <AddAppointmentButton doctors={doctors} patients={patients} />
-                </PageActions>
-            </PageHeader>
+                </PageActions>            </PageHeader>
             <PageContent>
-                <div className="text-center py-8">
-                    <p className="text-muted-foreground">
-                        Lista de agendamentos será implementada em breve...
-                    </p>
-                </div>
+                <DataTable data={appointments} columns={appointmentsTableColumns} />
             </PageContent>
         </PageContainer>
     );
