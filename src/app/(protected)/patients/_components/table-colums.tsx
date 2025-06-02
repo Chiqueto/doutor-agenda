@@ -12,6 +12,8 @@ import {
 import { patientsTable } from "@/db/schema";
 import { Button } from "@/components/ui/button";
 import { EditIcon, MoreVerticalIcon, Trash2Icon } from "lucide-react";
+import { Dialog } from "@/components/ui/dialog";
+import PatientTableActions from "./table-actions";
 
 type Patient = typeof patientsTable.$inferSelect;
 
@@ -49,25 +51,7 @@ export const patientsTableColumns: ColumnDef<Patient>[] = [
     id: "actions",
     cell: (params) => {
       const patient = params.row.original;
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="ghost" size="icon">
-              <MoreVerticalIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>{patient.name}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <EditIcon /> Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Trash2Icon /> Excluir
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <PatientTableActions patient={patient} />;
     },
   },
 ];
