@@ -33,6 +33,8 @@ export function DatePicker({
     to,
   };
 
+  console.log(date);
+
   const handleDateSelect = (dateRange: DateRange | undefined) => {
     if (dateRange?.from && dateRange?.to) {
       setFrom(dateRange.from);
@@ -52,7 +54,7 @@ export function DatePicker({
               !date && "text-muted-foreground",
             )}
           >
-            <CalendarIcon />
+            <CalendarIcon className="mr-2 h-4 w-4" />
             {date?.from ? (
               date.to ? (
                 <>
@@ -63,7 +65,7 @@ export function DatePicker({
                 format(date.from, "dd, LLL Y", { locale: ptBR })
               )
             ) : (
-              <span>Pick a date</span>
+              <span>Selecione um período</span>
             )}
           </Button>
         </PopoverTrigger>
