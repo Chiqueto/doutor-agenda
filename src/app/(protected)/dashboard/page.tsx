@@ -17,6 +17,7 @@ import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 import { DatePicker } from "./_components/date-picker";
+import { RevenueChart } from "./_components/revenue-chart";
 import StatsCard from "./_components/stats-card";
 
 interface DashboardPageProps {
@@ -27,7 +28,6 @@ interface DashboardPageProps {
 }
 
 const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
-
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -47,28 +47,37 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
     );
   }
 
-  const [totalRevenue, totalAppointments, totalDoctors, totalPatients] = await Promise.all([
-    db.select({ total: sum(appointmentsTable.appointmentPriceInCents) }).from(appointmentsTable).where(
-      and(
-        eq(appointmentsTable.clinicId, session.user.clinic.id),
-        gte(appointmentsTable.date, new Date(from)),
-        lte(appointmentsTable.date, new Date(to)),
-      ),
-    ),
-    db.select({ total: count(appointmentsTable.id) }).from(appointmentsTable).where(
-      and(
-        eq(appointmentsTable.clinicId, session.user.clinic.id),
-        gte(appointmentsTable.date, new Date(from)),
-        lte(appointmentsTable.date, new Date(to)),
-      ),
-    ),
-    db.select({ total: count(doctorsTable.id) }).from(doctorsTable).where(
-      eq(doctorsTable.clinicId, session.user.clinic.id),
-    ),
-    db.select({ total: count(patientsTable.id) }).from(patientsTable).where(
-      eq(patientsTable.clinicId, session.user.clinic.id),
-    ),
-  ])
+  const [totalRevenue, totalAppointments, totalDoctors, totalPatients] =
+    await Promise.all([
+      db
+        .select({ total: sum(appointmentsTable.appointmentPriceInCents) })
+        .from(appointmentsTable)
+        .where(
+          and(
+            eq(appointmentsTable.clinicId, session.user.clinic.id),
+            gte(appointmentsTable.date, new Date(from)),
+            lte(appointmentsTable.date, new Date(to)),
+          ),
+        ),
+      db
+        .select({ total: count(appointmentsTable.id) })
+        .from(appointmentsTable)
+        .where(
+          and(
+            eq(appointmentsTable.clinicId, session.user.clinic.id),
+            gte(appointmentsTable.date, new Date(from)),
+            lte(appointmentsTable.date, new Date(to)),
+          ),
+        ),
+      db
+        .select({ total: count(doctorsTable.id) })
+        .from(doctorsTable)
+        .where(eq(doctorsTable.clinicId, session.user.clinic.id)),
+      db
+        .select({ total: count(patientsTable.id) })
+        .from(patientsTable)
+        .where(eq(patientsTable.clinicId, session.user.clinic.id)),
+    ]);
 
   return (
     <PageContainer>
@@ -90,6 +99,9 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
           totalDoctors={totalDoctors[0].total}
           totalPatients={totalPatients[0].total}
         />
+        <div className="grid grid-cols-[2.25fr_1fr] gap-4">
+          <RevenueChart />
+        </div>
       </PageContent>
     </PageContainer>
   );
