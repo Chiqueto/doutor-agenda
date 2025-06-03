@@ -1,15 +1,16 @@
 "use server";
 
-import { generateTimeSlots } from "@/app/(protected)/doctors/_helpers/time";
-import { db } from "@/db";
-import { appointmentsTable, doctorsTable } from "@/db/schema";
-import { auth } from "@/lib/auth";
-import { actionClient } from "@/lib/next-safe-action";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
+
+import { generateTimeSlots } from "@/_helpers/time";
+import { db } from "@/db";
+import { appointmentsTable, doctorsTable } from "@/db/schema";
+import { auth } from "@/lib/auth";
+import { actionClient } from "@/lib/next-safe-action";
 
 dayjs.extend(utc);
 

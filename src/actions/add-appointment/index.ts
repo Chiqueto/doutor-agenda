@@ -9,8 +9,8 @@ import { appointmentsTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/next-safe-action";
 
-import { createAppointmentSchema } from "./schema";
 import { getAvailableTimes } from "../get-available-times";
+import { createAppointmentSchema } from "./schema";
 
 export const createAppointment = actionClient
   .schema(createAppointmentSchema)
@@ -62,4 +62,5 @@ export const createAppointment = actionClient
     });
 
     revalidatePath("/appointments");
+    revalidatePath("/dashboard");
   });

@@ -15,7 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-
+//TODO: alterar data FROM para frente também
 export function DatePicker({
   className,
 }: React.HTMLAttributes<HTMLDivElement>) {
@@ -37,8 +37,12 @@ export function DatePicker({
 
   const handleDateSelect = (dateRange: DateRange | undefined) => {
     if (dateRange?.from && dateRange?.to) {
-      setFrom(dateRange.from);
-      setTo(dateRange.to);
+      setFrom(dateRange.from, {
+        shallow: false,
+      });
+      setTo(dateRange.to, {
+        shallow: false,
+      });
     }
   };
 
