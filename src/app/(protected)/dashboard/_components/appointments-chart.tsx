@@ -1,0 +1,163 @@
+"use client";
+
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import dayjs from "dayjs";
+import { formatCurrencyInCents } from "@/_helpers/currency";
+
+export const description = "An area chart with gradient fill";
+
+interface AppointmentsChartProps {
+  dailyAppointmentsData: {
+    date: string;
+    appointments: number;
+    revenue: number;
+  }[];
+}
+
+export function AppointmentsChart({
+  dailyAppointmentsData,
+}: AppointmentsChartProps) {
+  // Gerar 21 dias: 10 antes + hoje + 10 depois
+  const chartDays = Array.from({ length: 21 }).map((_, i) =>
+    dayjs()
+      .subtract(10 - i, "days")
+      .format("YYYY-MM-DD"),
+  );
+
+  const chartData = chartDays.map((date) => {
+    const dataForDay = dailyAppointmentsData.find((d) => d.date === date);
+
+    return {
+      date: dayjs(date).format("DD/MM"),
+      fullDate: date,
+      appointments: dataForDay?.appointments || 0,
+      revenue: Number(dataForDay?.revenue || 0),
+    };
+  });
+
+  const chartConfig = {
+    appointments: {
+      label: "Agendamentos",
+      color: "#0B68F7",
+    },
+    revenue: {
+      label: "Faturamento",
+      color: "#10B981",
+    },
+  } satisfies ChartConfig;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Area Chart - Gradient</CardTitle>
+        <CardDescription>
+          Showing total visitors for the last 6 months
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={chartConfig}>
+          <AreaChart
+            accessibilityLayer
+            data={chartData}
+            margin={{
+              left: 12,
+              right: 12,
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={10}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              yAxisId={"left"}
+              tickMargin={8}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              yAxisId={"right"}
+              orientation="right"
+              tickMargin={8}
+              tickFormatter={(value) => formatCurrencyInCents(value)}
+            />
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  formatter={(value, name) => {
+                    if (name === "revenue") {
+                      return (
+                        <>
+                          <div className="h-3 w-3 rounded bg-[#10B981]" />
+                          <span className="text text-muted-foreground">
+                            Faturamento:
+                          </span>
+                          <span className="font-semibold">
+                            {formatCurrencyInCents(Number(value))}
+                          </span>
+                        </>
+                      );
+                    }
+                    return (
+                      <>
+                        <div className="h-3 w-3 rounded bg-[#0B68F7]" />
+                        <span className="text text-muted-foreground">
+                          Agendamentos:
+                        </span>
+                        <span className="font-semibold">{value}</span>
+                      </>
+                    );
+                  }}
+                  labelFormatter={(label, payload) => {
+                    if (payload && payload[0]) {
+                      return dayjs(payload[0].payload?.fullDate).format(
+                        "DD/MM/YYYY (dddd)",
+                      );
+                    }
+                    return label;
+                  }}
+                />
+              }
+            />
+            <Area
+              yAxisId={"left"}
+              dataKey="appointments"
+              type="monotone"
+              fill="var(--color-appointments)"
+              fillOpacity={0.2}
+              stroke="var(--color-appointments)"
+              strokeWidth={2}
+            />
+            <Area
+              yAxisId={"right"}
+              dataKey="revenue"
+              type="monotone"
+              fill="var(--color-revenue)"
+              fillOpacity={0.2}
+              stroke="var(--color-revenue)"
+              strokeWidth={2}
+            />
+          </AreaChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
+  );
+}
