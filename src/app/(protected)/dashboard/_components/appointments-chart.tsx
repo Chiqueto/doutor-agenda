@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/chart";
 import dayjs from "dayjs";
 import { formatCurrencyInCents } from "@/_helpers/currency";
+import { DollarSign } from "lucide-react";
 
 export const description = "An area chart with gradient fill";
 
@@ -62,23 +63,18 @@ export function AppointmentsChart({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Area Chart - Gradient</CardTitle>
-        <CardDescription>
-          Showing total visitors for the last 6 months
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center gap-2">
+        <DollarSign />
+        <CardTitle>Agendamentos e Faturamento</CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className="min-h-[200px]">
           <AreaChart
             accessibilityLayer
             data={chartData}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
+            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="date"
               tickLine={false}
