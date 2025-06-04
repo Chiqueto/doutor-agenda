@@ -1,8 +1,10 @@
 import dayjs from "dayjs";
-import { and, count, desc, eq, gte, lte, sql, sum } from "drizzle-orm";
+import { Calendar } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
 import { PageContainer } from "@/components/ui/page-container";
 import {
   PageActions,
@@ -12,20 +14,15 @@ import {
   PageHeaderContent,
   PageTitle,
 } from "@/components/ui/page-container";
-import { db } from "@/db";
-import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
+import { getDashboard } from "@/data/get-dashboard";
 import { auth } from "@/lib/auth";
 
-import { DatePicker } from "./_components/date-picker";
+import { appointmentsTableColumns } from "../appointments/_components/table-columns";
 import { AppointmentsChart } from "./_components/appointments-chart";
+import { DatePicker } from "./_components/date-picker";
 import StatsCard from "./_components/stats-card";
 import TopDoctors from "./_components/top-doctors";
 import TopSpecialities from "./_components/top-specialities";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
-import { DataTable } from "@/components/ui/data-table";
-import { appointmentsTableColumns } from "../appointments/_components/table-columns";
-import { getDashboard } from "@/data/get-dashboard";
 interface DashboardPageProps {
   searchParams: Promise<{
     from: string;
@@ -78,34 +75,53 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
         </PageActions>
       </PageHeader>
       <PageContent>
+        {/* Cards de estatísticas - mantém largura total */}
         <StatsCard
           totalRevenue={Number(totalRevenue.total)}
           totalAppointments={totalAppointments.total}
           totalDoctors={totalDoctors.total}
           totalPatients={totalPatients.total}
         />
-        <div className="grid grid-cols-[2.25fr_1fr] gap-4">
-          <AppointmentsChart dailyAppointmentsData={dailyAppointments} />
-          <TopDoctors doctors={topDoctors} />
+
+        {/* Container principal com largura fixa e consistente */}
+        <div className="w-full grid grid-cols-1 xl:grid-cols-12 gap-4">
+          {/* Gráfico ocupando 9/12 (equivalente a 2.25/3.25) */}
+          <div className="xl:col-span-9 w-full">
+            <AppointmentsChart dailyAppointmentsData={dailyAppointments} />
+          </div>
+
+          {/* Lista de médicos ocupando 3/12 (equivalente a 1/3.25) */}
+          <div className="xl:col-span-3 w-full">
+            <TopDoctors doctors={topDoctors} />
+          </div>
         </div>
-        <div className="grid grid-cols-[2.25fr_1fr] gap-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <Calendar className="text-muted-foreground" />
-                <CardTitle className="text-base">
-                  Agendamentos de hoje
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <DataTable
-                columns={appointmentsTableColumns}
-                data={todayAppointments}
-              />
-            </CardContent>
-          </Card>
-          <TopSpecialities specialities={topSpecialities} />
+
+        {/* Segunda linha com mesma estrutura para manter alinhamento */}
+        <div className="w-full grid grid-cols-1 xl:grid-cols-12 gap-4">
+          {/* Tabela de agendamentos ocupando 9/12 */}
+          <div className="xl:col-span-9 w-full">
+            <Card className="w-full">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Calendar className="text-muted-foreground" />
+                  <CardTitle className="text-base">
+                    Agendamentos de hoje
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <DataTable
+                  columns={appointmentsTableColumns}
+                  data={todayAppointments}
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Especialidades ocupando 3/12 */}
+          <div className="xl:col-span-3 w-full">
+            <TopSpecialities specialities={topSpecialities} />
+          </div>
         </div>
       </PageContent>
     </PageContainer>

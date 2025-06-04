@@ -1,7 +1,10 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -16,9 +19,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { authClient } from "@/lib/auth-client";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 const registerSchema = z.object({
     name: z.string().trim().min(1, { message: "Nome é obrigatório" }),
@@ -56,7 +56,7 @@ const SignUpForm = () => {
             }
         })
     }
-    return ( 
+    return (
         <Card>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -119,7 +119,7 @@ const SignUpForm = () => {
                 </form>
             </Form>
         </Card>
-     );
+    );
 }
- 
+
 export default SignUpForm;
