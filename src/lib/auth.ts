@@ -18,18 +18,18 @@ export const auth = betterAuth({
     additionalFields: {
       stripeCustomerId: {
         type: "string",
-        required: false,
         fieldName: "stripeCustomerId",
+        required: false,
       },
       stripeSubscriptionId: {
         type: "string",
-        required: false,
         fieldName: "stripeSubscriptionId",
+        required: false,
       },
       plan: {
         type: "string",
-        required: false,
         fieldName: "plan",
+        required: false,
       },
     },
   },
